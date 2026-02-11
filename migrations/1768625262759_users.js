@@ -14,6 +14,7 @@ export const up = (pgm) => {
   pgm.createTable('users', {
     id: {type: 'VARCHAR(255)', notNull: true, primaryKey: true},
     fullname: {type: 'VARCHAR(50)', notNull: true},
+    avatar_initial: {type: 'VARCHAR(4)', notNull: true},
     email: {type: 'VARCHAR(255)', notNull: true, unique: true},
     password: {type: 'VARCHAR(255)'},
     auth_provider: {type: 'provider', notNull: true, default: 'cridential'},

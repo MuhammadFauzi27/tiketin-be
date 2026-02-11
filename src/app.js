@@ -3,7 +3,7 @@ import morgan from "morgan"
 import helmet from "helmet"
 import cors from "cors"
 import mainRoute from "./routes/index.js"
-import errorMiddleware from "./middlewares/errorMiddleware.js"
+import {errorMiddleware} from "./middlewares/errorMiddleware.js"
 
 const App = () => {
   const app = express()

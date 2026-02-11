@@ -1,25 +1,18 @@
-import responseError from "../exceptions/responseError.js"
+import { AppError } from "../exceptions/appError.js"
 
-const errorMiddleware = (err, req, res, next) => {
-  console.error(`[errorMiddleware] - Error: ${err}`)
-
-  if (!err) {
-    next()
+export const errorMiddleware = async (err, req, res, next) => {
+  console.error(err);
+  if (res.headersSent) {
+    return next(err);
   }
 
-  if (err instanceof responseError) {
-    res.status(err.status).json({
-      success: false,
-      code: err.status,
-      message: err.track,
-    }).end()
+  if(err instanceof AppError) {
+    res.status(err.statusCode).json({
+      errors: err.message
+    })
   } else {
     res.status(500).json({
-      success: false,
-      code: 500,
-      message: "Terjadi kesalahan internal server",
-    }).end()
+      error: err.message
+    })
   }
 }
-
-export default errorMiddleware
