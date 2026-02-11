@@ -18,7 +18,8 @@ const validateSchema = (schema, payload) => {
 const validate = {
   auth: {
     login : (payload) => validateSchema(auth.loginSchema, payload),
-    register : (payload) => validateSchema(auth.registerSchema, payload)
+    register : (payload) => validateSchema(auth.registerSchema, payload),
+    loginGoogle: (payload) => validateSchema(auth.loginGoogleSchema, payload)
   },
 }
 

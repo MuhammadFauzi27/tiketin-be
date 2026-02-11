@@ -11,7 +11,12 @@ const loginSchema = Joi.object({
   password: Joi.string().min(6).max(32).required()
 }).required()
 
+const loginGoogleSchema = Joi.object({
+  credential: Joi.string().required()
+}).required()
+
 export {
   registerSchema,
-  loginSchema
+  loginSchema,
+  loginGoogleSchema
 }

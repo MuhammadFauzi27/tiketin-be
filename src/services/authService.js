@@ -12,6 +12,9 @@ import bcrypt from 'bcrypt';
 import {NotFoundError} from "../exceptions/notFoundError.js";
 import jwt from "../utils/jwt.js";
 import {generateInitials} from "../utils/generateInitials.js";
+import {OAuth2Client} from "google-auth-library";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const registerService = async (payload) => {
   const user = validate.auth.register(payload);
@@ -24,6 +27,7 @@ export const registerService = async (payload) => {
   user.id = uuid();
   user.avatarInitial = generateInitials(user.fullname);
   user.password = await bcrypt.hash(user.password, config.bcryptSalt);
+  user.authProvider = 'cridential';
 
   await createUserRepository(user, pool)
 }
@@ -47,8 +51,44 @@ export const loginService = async (payload) => {
   const payloadJwt = {
     id: currentUser.id,
     fullname: currentUser.fullname,
-    email: currentUser.email
+    email: currentUser.email,
+    avatar_initial: currentUser.avatar_initial
   }
+
+  return jwt.signToken(payloadJwt);
+  }
+
+export const loginGoogleService = async (payload) => {
+  validate.auth.loginGoogle(payload);
+  const ticket = await googleClient.verifyIdToken({
+    idToken: payload.credential,
+    audience: process.env.GOOGLE_CLIENT_ID
+  });
+  const googlePayload = ticket.getPayload();
+  const { email, name } = googlePayload;
+
+  let user = await getUserByEmailRepository(email, pool);
+
+  if (!user) {
+    const newId = uuid();
+    const newUser = {
+      id: newId,
+      email: email,
+      fullname: name,
+      password: null,
+      avatarInitial: generateInitials(name),
+      authProvider: 'google'
+    };
+    await createUserRepository(newUser, pool);
+    user = newUser;
+  }
+
+  const payloadJwt = {
+    id: user.id,
+    fullname: user.fullname,
+    email: user.email,
+    avatar_initial: user.avatarInitial || user.avatar_initial
+  };
 
   return jwt.signToken(payloadJwt);
 }
